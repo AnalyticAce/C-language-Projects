@@ -1,0 +1,96 @@
+/*
+** EPITECH PROJECT, 2023
+** split_lidar
+** File description:
+** split_lidar
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include "../n4s.h"
+#define SIZE 100
+
+char **parsing_string2(char *str, int max_size, char *deli);
+
+void exe_cmd(char *str)
+{
+    write(1, str, strlen(str));
+}
+
+void move_car(double gauche, double milieu, double droit, int n);
+
+int split_info(void)
+{
+    char **tab; char *str = NULL;
+    size_t n = 0;
+    exe_cmd("car_forward:0.6\n");
+    if (getline(&str, &n, stdin) < 0) return 0;
+    if (strcmp(str, "Track cleared") == 0) {
+        exe_cmd("stop_simulation\n");
+        exit (0);
+    }
+    while (1) {
+        write(1, "get_info_lidar\n", strlen("get_info_lidar\n"));
+        if (getline(&str, &n, stdin) < 0) return 0;
+        tab = parsing_string2(str, SIZE, ":");
+        double gauche = atof(tab[3]);
+        double milieu = atof(tab[19]);
+        double droit = atof(tab[34]);
+        if (gauche > droit) {
+            move_car(gauche, milieu, droit, 0);
+        } else {
+            move_car(gauche, milieu, droit, 1);  
+        }
+    }
+}
+
+int choose_direction(int n, double pos)
+{
+    char *str = NULL; size_t nb = 0;
+    exe_cmd("wheels_dir:"); char buf[6];
+    if (n == 1)
+         write(1, "-", 1);
+    sprintf(buf, "%.2f\n", pos);
+    exe_cmd(buf);
+    if (getline(&str, &nb, stdin) < 0) return 0;
+    if (strcmp(str, "Track cleared") == 0) {
+        exe_cmd("stop_simulation\n");
+        exit (0);
+    }
+}
+
+void move_car(double gauche, double milieu, double droit, int nb)
+{
+    // double pos[6] = {0.33, 0.3, 0.22, 0.18, 0.03, 0.01};
+    double pos[6] = {0.33, 0.31, 0.22, 0.19, 0.04, 0.01};
+    //int tab[5] = {400, 500, 700, 1020, 1350};
+    //int tab[5] = {300, 400, 600, 920, 1250};
+    //  int tab[5] = {225, 325, 525, 845, 1175};
+    int tab[5] = {225, 335, 525, 845, 1175};
+    for (int i = 0; i < 5; i++) {
+        if (milieu < tab[i] - 15) {
+            if (nb == 1) {
+                choose_direction(1, pos[i]);
+            } else {
+                choose_direction(0, pos[i]);
+            }
+            return;
+        }
+............    }
+}
+
+int main(void)
+{
+    char *str = NULL;
+    char *message1 = "start_simulation\n";
+    size_t nb = 0;
+    write(1, message1, strlen(message1));
+    if (getline(&str, &nb, stdin) < 0) return 0;
+    if (strcmp(str, "Track cleared") == 0) {
+        exe_cmd("stop_simulation\n");
+        exit (0);
+    }
+    split_info();
+}
